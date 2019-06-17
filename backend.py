@@ -18,11 +18,12 @@ class S(BaseHTTPRequestHandler):
     def _set_headers(self):
         self.send_response(200)
         self.send_header('Content-type', 'text/html')
+        self.send_header('Access-Control-Allow-Origin', '*')
         self.end_headers()
 
     def do_GET(self):
         self._set_headers()
-        generatedHTML = "<h1>Hello!</h1><img src='https://via.placeholder.com/150'/><p>This is a paragraph</p>"
+        generatedHTML = "<h1>Hello from server!</h1><img src='https://via.placeholder.com/150'/><p>This is a paragraph</p>"
         self.wfile.write(generatedHTML.encode("utf-8"))
 
     def do_HEAD(self):
