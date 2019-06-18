@@ -14,15 +14,13 @@ import string
 from classes.inference.Sampler import *
 
 
-# from sketch-code-master import convert_single_image
-
 output_folder="_out"
 
 if not os.path.exists(output_folder):
         os.makedirs(output_folder)
 
-SAMPLER = Sampler(model_json_path="sketch-code-master/bin/model_json.json",
-                      model_weights_path = "sketch-code-master/bin/weights.h5")
+SAMPLER = Sampler(model_json_path="../bin/model_json.json",
+                      model_weights_path = "../bin/weights.h5")
 # sampler.convert_single_image(output_folder, png_path=png_path, print_generated_output=print_generated_output, get_sentence_bleu=print_bleu_score, original_gui_filepath=original_gui_filepath, style=style)
 
 PORT = 8080
@@ -72,11 +70,18 @@ class MyHandler(http.server.BaseHTTPRequestHandler):
             print("saved " + fname)
 
             #TODO call AI
-            convert_single_image.main(args)
+            print("computing...")
+            sampler.convert_single_image(output_folder, png_path=fname, print_generated_output=0,
+            get_sentence_bleu=0, original_gui_filepath=None, style='default')
+            print("done.")
+
+            file_to_serve = output_folder + "/" + fname.replace("png", "html")
+
+            print("to serve: " +file_to_serve);
 
             # read response file
             body = ''
-            with open(FILE_TO_SERVE, "rb") as f:
+            with open(file_to_serve, "rb") as f:
                 body = f.read()
 
             # set headers
@@ -106,7 +111,7 @@ class MyHandler(http.server.BaseHTTPRequestHandler):
 
 def httpd(handler_class=MyHandler, server_address=('0.0.0.0', PORT), file_=None):
     try:
-        print("Server started on http://%s:%s/ serving file %s" % (server_address[0], server_address[1], FILE_TO_SERVE))
+        print("Server started on http://%s:%s/" % (server_address[0], server_address[1]))
         srvr = http.server.HTTPServer(server_address, handler_class)
         srvr.serve_forever()  # serve_forever
     except KeyboardInterrupt:
@@ -115,5 +120,5 @@ def httpd(handler_class=MyHandler, server_address=('0.0.0.0', PORT), file_=None)
 
 if __name__ == "__main__":
     """ ./corsdevserver.py """
-    #httpd()
+    httpd()
     
