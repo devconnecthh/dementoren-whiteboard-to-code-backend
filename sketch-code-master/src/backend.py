@@ -11,8 +11,18 @@ import shutil
 import random
 import string
 
+from classes.inference.Sampler import *
+
+
+OUTPUT_FOLDER="_out"
+if not os.path.exists(OUTPUT_FOLDER):
+        os.makedirs(OUTPUT_FOLDER)
+# make sure you downloaded the model and weights as per scripts/get_pretrained_model.sh
+SAMPLER = Sampler(model_json_path="../bin/model_json.json",
+                      model_weights_path = "../bin/weights.h5")
+
 PORT = 8080
-FILE_TO_SERVE = 'wireframe.html'
+
 BASE62_CHARSET=string.ascii_lowercase + string.digits + string.ascii_uppercase
 
 def rand_string(n=8, charset=BASE62_CHARSET):
@@ -57,11 +67,20 @@ class MyHandler(http.server.BaseHTTPRequestHandler):
             fdst.close()
             print("saved " + fname)
 
-            #TODO call AI
+            # call AI
+            print("computing...")
+            sampler.convert_single_image(OUTPUT_FOLDER, png_path=fname, print_generated_output=0,
+            get_sentence_bleu=0, original_gui_filepath=None, style='default')
+            print("done.")
+
+            # FIXME will this work only with PNG ?
+            file_to_serve = OUTPUT_FOLDER + "/" + fname.replace("png", "html")
+
+            print("to serve: " +file_to_serve);
 
             # read response file
             body = ''
-            with open(FILE_TO_SERVE, "rb") as f:
+            with open(file_to_serve, "rb") as f:
                 body = f.read()
 
             # set headers
@@ -84,14 +103,14 @@ class MyHandler(http.server.BaseHTTPRequestHandler):
         self.send_header("Content-type", "text/html")
         self.end_headers()
         body = ''
-        with open(FILE_TO_SERVE,"rb") as f:
+        with open("../../wireframe.html","rb") as f:
             body = f.read()
         self.wfile.write(body)
 
 
 def httpd(handler_class=MyHandler, server_address=('0.0.0.0', PORT), file_=None):
     try:
-        print("Server started on http://%s:%s/ serving file %s" % (server_address[0], server_address[1], FILE_TO_SERVE))
+        print("Server started on http://%s:%s/" % (server_address[0], server_address[1]))
         srvr = http.server.HTTPServer(server_address, handler_class)
         srvr.serve_forever()  # serve_forever
     except KeyboardInterrupt:
@@ -101,3 +120,4 @@ def httpd(handler_class=MyHandler, server_address=('0.0.0.0', PORT), file_=None)
 if __name__ == "__main__":
     """ ./corsdevserver.py """
     httpd()
+    
