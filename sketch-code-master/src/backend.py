@@ -14,17 +14,15 @@ import string
 from classes.inference.Sampler import *
 
 
-output_folder="_out"
-
-if not os.path.exists(output_folder):
-        os.makedirs(output_folder)
-
+OUTPUT_FOLDER="_out"
+if not os.path.exists(OUTPUT_FOLDER):
+        os.makedirs(OUTPUT_FOLDER)
+# make sure you downloaded the model and weights as per scripts/get_pretrained_model.sh
 SAMPLER = Sampler(model_json_path="../bin/model_json.json",
                       model_weights_path = "../bin/weights.h5")
-# sampler.convert_single_image(output_folder, png_path=png_path, print_generated_output=print_generated_output, get_sentence_bleu=print_bleu_score, original_gui_filepath=original_gui_filepath, style=style)
 
 PORT = 8080
-FILE_TO_SERVE = 'wireframe.html'
+
 BASE62_CHARSET=string.ascii_lowercase + string.digits + string.ascii_uppercase
 
 def rand_string(n=8, charset=BASE62_CHARSET):
@@ -69,13 +67,14 @@ class MyHandler(http.server.BaseHTTPRequestHandler):
             fdst.close()
             print("saved " + fname)
 
-            #TODO call AI
+            # call AI
             print("computing...")
-            sampler.convert_single_image(output_folder, png_path=fname, print_generated_output=0,
+            sampler.convert_single_image(OUTPUT_FOLDER, png_path=fname, print_generated_output=0,
             get_sentence_bleu=0, original_gui_filepath=None, style='default')
             print("done.")
 
-            file_to_serve = output_folder + "/" + fname.replace("png", "html")
+            # FIXME will this work only with PNG ?
+            file_to_serve = OUTPUT_FOLDER + "/" + fname.replace("png", "html")
 
             print("to serve: " +file_to_serve);
 
@@ -104,7 +103,7 @@ class MyHandler(http.server.BaseHTTPRequestHandler):
         self.send_header("Content-type", "text/html")
         self.end_headers()
         body = ''
-        with open(FILE_TO_SERVE,"rb") as f:
+        with open("../../wireframe.html","rb") as f:
             body = f.read()
         self.wfile.write(body)
 

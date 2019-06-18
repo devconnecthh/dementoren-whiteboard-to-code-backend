@@ -11,20 +11,6 @@ import shutil
 import random
 import string
 
-from classes.inference.Sampler import *
-
-
-# from sketch-code-master import convert_single_image
-
-output_folder="_out"
-
-if not os.path.exists(output_folder):
-        os.makedirs(output_folder)
-
-SAMPLER = Sampler(model_json_path="sketch-code-master/bin/model_json.json",
-                      model_weights_path = "sketch-code-master/bin/weights.h5")
-# sampler.convert_single_image(output_folder, png_path=png_path, print_generated_output=print_generated_output, get_sentence_bleu=print_bleu_score, original_gui_filepath=original_gui_filepath, style=style)
-
 PORT = 8080
 FILE_TO_SERVE = 'wireframe.html'
 BASE62_CHARSET=string.ascii_lowercase + string.digits + string.ascii_uppercase
@@ -72,7 +58,6 @@ class MyHandler(http.server.BaseHTTPRequestHandler):
             print("saved " + fname)
 
             #TODO call AI
-            convert_single_image.main(args)
 
             # read response file
             body = ''
@@ -115,5 +100,4 @@ def httpd(handler_class=MyHandler, server_address=('0.0.0.0', PORT), file_=None)
 
 if __name__ == "__main__":
     """ ./corsdevserver.py """
-    #httpd()
-    
+    httpd()
